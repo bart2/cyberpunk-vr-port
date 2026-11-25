@@ -358,8 +358,13 @@ end
 local function requestRecenter()
     recenterCounter = recenterCounter + 1
     local f = io.open('vrik_recenter.ini', 'w')
-    if f then f:write('recenter=' .. tostring(recenterCounter) .. '\n'); f:close() end
+    if not f then return false end
+    local written = f:write('recenter=' .. tostring(recenterCounter) .. '\n')
+    local closed = f:close()
+    return written ~= nil and closed ~= nil
 end
+
+local vehicleRecenter = require('vehicle_recenter').new(requestRecenter, 2.0)
 
 -- Recenter when the player attaches to the world (save load / spawn). OnGameAttached
 -- fires during the load/fade, before the HMD pose settles, so queue the recenter a
@@ -371,6 +376,7 @@ local function ensureObservers()
     pcall(function()
         Observe('PlayerPuppet', 'OnGameAttached', function()
             recenterPending = 3.5
+            vehicleRecenter.reset()
         end)
     end)
 end
@@ -788,7 +794,8 @@ registerForEvent('onUpdate', function(dt)
     end
 
     -- Fire a queued (delayed) recenter once gameplay has settled and the player exists.
-    if recenterPending >= 0.0 then
+    local loadRecenterPending = recenterPending >= 0.0
+    if loadRecenterPending then
         recenterPending = recenterPending - (dt or 0.0)
         if recenterPending < 0.0 and Game.GetPlayer() then
             requestRecenter()
@@ -796,6 +803,7 @@ registerForEvent('onUpdate', function(dt)
     end
 
     local player = Game.GetPlayer()
+    vehicleRecenter.update(player, dt, loadRecenterPending)
     if not player then return end
 
     if type(VRMirrorDouble) == 'function' and not pcall(updateMirrorDouble, player, dt or 0.0) then

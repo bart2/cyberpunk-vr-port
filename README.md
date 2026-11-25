@@ -433,6 +433,13 @@ L3 press instead, so nothing is lost by using it.
 Buttons follow each runtime's interaction profile (Touch / Index / Vive / WMR);
 customise the actual actions in the game's *Settings → Key Bindings → Controller*.
 
+The HMD automatically recenters two seconds after finishing entry into or exit from a car,
+giving you time to sit in a physical chair or stand up. This includes passenger seats.
+Seat changes and vehicle combat do not trigger another recenter; the delay restarts after a pause menu.
+
+Blue navigation lines use a warm coral tint on the car HUD so they stand out from the cyan roads.
+Their original colors return when you leave the car.
+
 Hotkeys:
 
 - `F7` — recenter HMD
